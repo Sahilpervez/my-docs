@@ -1,7 +1,12 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_docs/colors.dart';
+import 'package:my_docs/models/document_model.dart';
+import 'package:my_docs/models/error_model.dart';
+import 'package:my_docs/repo/auth_repository.dart';
+import 'package:my_docs/repo/document_repository.dart';
 
 class DocumentScreen extends ConsumerStatefulWidget {
   const DocumentScreen({Key? key, required this.id}) : super(key: key);
@@ -15,10 +20,47 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
     text: "Untitled Document",
   );
   final quill.QuillController _quillController = quill.QuillController.basic();
+  ErrorModel? errorModel;
+  @override
+  void initState() {
+    super.initState();
+    if (kDebugMode) {
+      print("inside init state");
+      print("ID = ${widget.id}");
+    }
+    fetchCurrentDocument();
+  }
+
+  void fetchCurrentDocument() async {
+    errorModel = await ref
+        .read(documentRepositoryProvider)
+        .getDocumentById(ref.read(userProvider)!.token, widget.id);
+    if (kDebugMode) {
+      print("ERROR: ${errorModel?.error}");
+      print("DATA: ${errorModel?.data}");
+    }
+
+    if (errorModel!.data != null) {
+      _titleController.text = (errorModel!.data as DocumentModel).title;
+    }
+    setState(() {});
+  }
+
   @override
   void dispose() {
     super.dispose();
     _titleController.dispose();
+  }
+
+  void updateTitle(WidgetRef ref, String title) async {
+    final res = await ref.read(documentRepositoryProvider).updateTitle(
+          token: ref.read(userProvider)!.token,
+          title: title,
+          id: widget.id,
+        );
+    if (kDebugMode) {
+      print(res.data);
+    }
   }
 
   @override
@@ -41,11 +83,17 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
               width: 200,
               child: TextField(
                 controller: _titleController,
+                onSubmitted: (value) {
+                  updateTitle(ref, value);
+                },
                 decoration: InputDecoration(
                   contentPadding: const EdgeInsets.only(left: 10),
                   focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                      borderSide: const BorderSide(color: kBlueColor)),
+                    borderRadius: BorderRadius.circular(10),
+                    borderSide: const BorderSide(
+                      color: kBlueColor,
+                    ),
+                  ),
                   border: InputBorder.none,
                 ),
               ),
@@ -72,19 +120,20 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
       ),
       body: Center(
         child: Column(
-          // crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20),
               child: quill.QuillToolbar.simple(
                 configurations: quill.QuillSimpleToolbarConfigurations(
-                  showAlignmentButtons: true,
-                  showColorButton: true,
-                  showSearchButton: true,
-                  controller: _quillController),
+                    showAlignmentButtons: true,
+                    showColorButton: true,
+                    showSearchButton: true,
+                    controller: _quillController),
               ),
             ),
-            const SizedBox(height: 10,),
+            const SizedBox(
+              height: 10,
+            ),
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 15.0),
@@ -92,15 +141,14 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                   width: 800,
                   child: Card(
                     color: kWhiteColor,
-                    elevation:5,
+                    elevation: 5,
                     child: Padding(
                       padding: const EdgeInsets.all(30.0),
                       child: quill.QuillEditor.basic(
                         configurations: quill.QuillEditorConfigurations(
-                          controller: _quillController,
-                          readOnly: false,
-                          expands: false
-                        ),
+                            controller: _quillController,
+                            readOnly: false,
+                            expands: false),
                       ),
                     ),
                   ),

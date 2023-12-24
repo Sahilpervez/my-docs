@@ -33,7 +33,7 @@ class HomeScreen extends ConsumerWidget {
   void navigateToDocument(BuildContext context, String id){
     final navigator = Routemaster.of(context);
 
-    navigator.push('/document/:$id');
+    navigator.push('/document/$id');
   }
 
   @override
@@ -72,6 +72,7 @@ class HomeScreen extends ConsumerWidget {
                 height: 50,
                 child: InkWell(
                   onTap: (){
+                    print(currDocument.id);
                     navigateToDocument(context, currDocument.id);
                   },
                   child: Card(

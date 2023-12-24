@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_docs/models/error_model.dart';
@@ -37,13 +36,10 @@ class _MyAppState extends ConsumerState<MyApp> {
     // we update our current userProvider
     // print("Error Model : ${errorModel?.data}");
     if (errorModel != null && errorModel!.data != null) {
-      if (kDebugMode) {
-        print("Im here");
-      }
       ref.read(userProvider.notifier).update((state) => errorModel!.data);
-      if (kDebugMode) {
-        print("User Updated");
-      }
+      // if (kDebugMode) {
+      //   print("User Updated");
+      // }
       // print(ref.read(userProvider)?.name);
     }
   }
