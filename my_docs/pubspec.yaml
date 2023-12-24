@@ -33,6 +33,14 @@ dependencies:
     sdk: flutter
   google_sign_in: null
   flutter_riverpod:
+  http:
+  shared_preferences:
+  routemaster: ^1.0.1
+  flutter_quill: ^9.1.0
+  url_launcher:
+  flutter_keyboard_visibility:
+  device_info_plus:
+  super_clipboard:
 
 dev_dependencies:
   flutter_lints: ^2.0.0

@@ -1,0 +1,115 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:my_docs/colors.dart';
+
+class DocumentScreen extends ConsumerStatefulWidget {
+  const DocumentScreen({Key? key, required this.id}) : super(key: key);
+  final String id;
+  @override
+  ConsumerState<ConsumerStatefulWidget> createState() => _DocumentScreenState();
+}
+
+class _DocumentScreenState extends ConsumerState<DocumentScreen> {
+  final TextEditingController _titleController = TextEditingController(
+    text: "Untitled Document",
+  );
+  final quill.QuillController _quillController = quill.QuillController.basic();
+  @override
+  void dispose() {
+    super.dispose();
+    _titleController.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: kWhiteColor,
+        elevation: 0,
+        title: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 10.0),
+          child: Row(children: [
+            Image.asset(
+              "assets/Icons/docs_logo.png",
+              height: 40,
+            ),
+            const SizedBox(
+              width: 10,
+            ),
+            SizedBox(
+              width: 200,
+              child: TextField(
+                controller: _titleController,
+                decoration: InputDecoration(
+                  contentPadding: const EdgeInsets.only(left: 10),
+                  focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      borderSide: const BorderSide(color: kBlueColor)),
+                  border: InputBorder.none,
+                ),
+              ),
+            ),
+          ]),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            decoration:
+                BoxDecoration(border: Border.all(color: kGreyColor, width: 1)),
+          ),
+        ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(backgroundColor: kBlueColor),
+                onPressed: () {},
+                icon: const Icon(Icons.lock, size: 16),
+                label: Text("Share")),
+          )
+        ],
+      ),
+      body: Center(
+        child: Column(
+          // crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              child: quill.QuillToolbar.simple(
+                configurations: quill.QuillSimpleToolbarConfigurations(
+                  showAlignmentButtons: true,
+                  showColorButton: true,
+                  showSearchButton: true,
+                  controller: _quillController),
+              ),
+            ),
+            const SizedBox(height: 10,),
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 15.0),
+                child: SizedBox(
+                  width: 800,
+                  child: Card(
+                    color: kWhiteColor,
+                    elevation:5,
+                    child: Padding(
+                      padding: const EdgeInsets.all(30.0),
+                      child: quill.QuillEditor.basic(
+                        configurations: quill.QuillEditorConfigurations(
+                          controller: _quillController,
+                          readOnly: false,
+                          expands: false
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}

@@ -45,3 +45,4 @@ app.*.map.json
 /LEARN.md
 /assets/Learn_Assets
 
+/server/node_modules
