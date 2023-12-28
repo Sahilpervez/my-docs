@@ -1,12 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_quill/flutter_quill.dart' as quill;
+import 'package:flutter_quill/quill_delta.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:my_docs/colors.dart';
 import 'package:my_docs/models/document_model.dart';
 import 'package:my_docs/models/error_model.dart';
 import 'package:my_docs/repo/auth_repository.dart';
 import 'package:my_docs/repo/document_repository.dart';
+import 'package:my_docs/repo/socket_repository.dart';
+import 'package:my_docs/widgets/loader.dart';
+import 'package:routemaster/routemaster.dart';
 
 class DocumentScreen extends ConsumerStatefulWidget {
   const DocumentScreen({Key? key, required this.id}) : super(key: key);
@@ -19,16 +26,39 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
   final TextEditingController _titleController = TextEditingController(
     text: "Untitled Document",
   );
-  final quill.QuillController _quillController = quill.QuillController.basic();
+  quill.QuillController? _quillController;
   ErrorModel? errorModel;
+
+  SocketRepository socketRepo = SocketRepository();
+
   @override
   void initState() {
     super.initState();
-    if (kDebugMode) {
-      print("inside init state");
-      print("ID = ${widget.id}");
-    }
+    // if (kDebugMode) {
+    // print("inside init state");
+    // print("ID = ${widget.id}");
+    // }
+    socketRepo.joinRoom(widget.id);
+    // print("ROOM JOINED!!");
+    // print("FETCHING DOCUMENT...");
     fetchCurrentDocument();
+
+    // print("ESTABLISHING CHANGE LISTENER....");
+    socketRepo.changeListener(converterFunction: (data) {
+      _quillController?.compose(
+        Delta.fromJson(data['delta']),
+        _quillController?.selection ?? const TextSelection.collapsed(offset: 0),
+        quill.ChangeSource.remote,
+      );
+    });
+    // print("ESTABLISHED CHANGE LISTENERS...");
+
+    Timer.periodic(const Duration(seconds: 2), (timer) {
+      socketRepo.autoSave(<String, dynamic>{
+        'delta': _quillController!.document.toDelta(),
+        'room': widget.id,
+      });
+    });
   }
 
   void fetchCurrentDocument() async {
@@ -42,8 +72,27 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
 
     if (errorModel!.data != null) {
       _titleController.text = (errorModel!.data as DocumentModel).title;
+      // print("INITIALIZING QUILL CONTROLLER...");
+      _quillController = quill.QuillController(
+        document: errorModel!.data.content.isEmpty
+            ? quill.Document()
+            : quill.Document.fromDelta(
+                Delta.fromJson(errorModel!.data.content)),
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+      // print("QUILL CONTROLLER INITIALIZED...");
+      setState(() {});
     }
-    setState(() {});
+    // print("LISTENING TO CHANGES...");
+    _quillController!.document.changes.listen((event) {
+      if (event.source == quill.ChangeSource.local) {
+        Map<String, dynamic> map = {
+          'delta': event.change,
+          'room': widget.id,
+        };
+        socketRepo.typing(map);
+      }
+    });
   }
 
   @override
@@ -63,8 +112,18 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
     }
   }
 
+  void goToHome() {
+    final navigator = Routemaster.of(context);
+    navigator.replace('/');
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (_quillController == null) {
+      return const Scaffold(
+        body: Loader(),
+      );
+    }
     return Scaffold(
       appBar: AppBar(
         backgroundColor: kWhiteColor,
@@ -72,9 +131,14 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
         title: Padding(
           padding: const EdgeInsets.symmetric(vertical: 10.0),
           child: Row(children: [
-            Image.asset(
-              "assets/Icons/docs_logo.png",
-              height: 40,
+            InkWell(
+              onTap: () {
+                goToHome();
+              },
+              child: Image.asset(
+                "assets/Icons/docs_logo.png",
+                height: 40,
+              ),
             ),
             const SizedBox(
               width: 10,
@@ -112,9 +176,22 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
             padding: const EdgeInsets.all(10.0),
             child: ElevatedButton.icon(
                 style: ElevatedButton.styleFrom(backgroundColor: kBlueColor),
-                onPressed: () {},
+                onPressed: () {
+                  Clipboard.setData(ClipboardData(
+                          text:
+                              "http://localhost:3000/#/document/${widget.id}"))
+                      .then(
+                    (value) => ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          "Link Copied to Clipboard",
+                        ),
+                      ),
+                    ),
+                  );
+                },
                 icon: const Icon(Icons.lock, size: 16),
-                label: Text("Share")),
+                label: const Text("Share")),
           )
         ],
       ),
@@ -128,7 +205,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                     showAlignmentButtons: true,
                     showColorButton: true,
                     showSearchButton: true,
-                    controller: _quillController),
+                    controller: _quillController!),
               ),
             ),
             const SizedBox(
@@ -146,7 +223,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                       padding: const EdgeInsets.all(30.0),
                       child: quill.QuillEditor.basic(
                         configurations: quill.QuillEditorConfigurations(
-                            controller: _quillController,
+                            controller: _quillController!,
                             readOnly: false,
                             expands: false),
                       ),

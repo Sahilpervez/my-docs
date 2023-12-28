@@ -4,6 +4,7 @@
 *.pyc
 *.swp
 .DS_Store
+.env
 .atom/
 .buildlog/
 .history
@@ -46,3 +47,4 @@ app.*.map.json
 /assets/Learn_Assets
 
 /server/node_modules
+/server/.env

@@ -42,6 +42,7 @@ class AuthRepository {
       final user = await _googleSignIn.signIn();
       if (user != null) {
         if (kDebugMode) {
+          print("FROM GOOGLE SIGN IN : ");
           print(user.displayName);
           print(user.email);
           print(user.id);
