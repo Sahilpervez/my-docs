@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon index.js"
+    "start": "nodemon index.js",
+    "dev": "nodemon index.js",
+    "build": "npm i && npm audit fix --force && npm install nodemon && npm install cors && npm install express-session"
   },
   "keywords": [],
   "author": "",
