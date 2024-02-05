@@ -32,6 +32,7 @@ class DocumentRepository {
         body: jsonEncode({
           'createdAt': DateTime.now().millisecondsSinceEpoch,
         }),
+        encoding: Encoding.getByName('utf-8'),
       );
       // api call finished
 
@@ -95,6 +96,7 @@ class DocumentRepository {
           'x-auth-token': token,
         },
         body: jsonEncode({'title': title, "id": id}),
+        encoding: Encoding.getByName('utf-8'),
       );
       switch (res.statusCode) {
         case 200:
