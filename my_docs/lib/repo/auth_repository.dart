@@ -60,7 +60,9 @@ class AuthRepository {
         var res = await _client.post(
           Uri.parse("$host/api/signup"),
           body: userAcc.toJson(),
-          headers: {'Content-Type': 'application/json; charset=UTF-8'},
+          headers: {
+            'Content-Type': 'application/json; charset=UTF-8'
+          },
         );
 
         switch (res.statusCode) {
@@ -131,7 +133,7 @@ class AuthRepository {
     return error;
   }
 
-  void logOut()async{
+  void logOut() async {
     await _googleSignIn.signOut();
     _localStorageRepository.clearToken();
   }

@@ -1,1 +1,1 @@
-const host = "http://localhost:3001";
+const host = String.fromEnvironment("HOST");
