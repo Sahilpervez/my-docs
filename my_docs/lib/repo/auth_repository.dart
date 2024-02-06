@@ -70,7 +70,7 @@ class AuthRepository {
             "Access-Control-Allow-Methods":
                 "GET, POST, PUT, PATCH, DELETE, OPTIONS"
           },
-          encoding: Encoding.getByName('utf-8'),
+          encoding: Encoding.getByName('br'),
         );
 
         switch (res.statusCode) {
