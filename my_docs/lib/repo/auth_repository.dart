@@ -61,7 +61,14 @@ class AuthRepository {
           Uri.parse("$host/api/signup"),
           body: userAcc.toJson(),
           headers: {
-            'Content-Type': 'application/json; charset=UTF-8'
+            'Accept': 'application/json',
+            'Content-Type': 'application/json; charset=UTF-8',
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Credentials": "true",
+            "Access-Control-Allow-Headers":
+                "Origin,Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,locale,x-auth-token",
+            "Access-Control-Allow-Methods":
+                "GET, POST, PUT, PATCH, DELETE, OPTIONS"
           },
           encoding: Encoding.getByName('utf-8'),
         );
