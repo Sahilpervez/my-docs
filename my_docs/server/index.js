@@ -14,29 +14,30 @@ const app = express();
 
 const DB = process.env.DB_URL;
 
-var server = http.createServer((req, res) => {
-    const headers = {
-      'Access-Control-Allow-Origin': '*', /* @dev First, read about security */
-      'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
-      "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept,x-auth-token"
-      /** add other headers as per requirement */
-    };
+// var server = http.createServer((req, res) => {
+//     const headers = {
+//       'Access-Control-Allow-Origin': '*', /* @dev First, read about security */
+//       'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+//       "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept,x-auth-token"
+//       /** add other headers as per requirement */
+//     };
   
-    if (req.method === 'OPTIONS') {
-      res.writeHead(204, headers);
-      res.end();
-      return;
-    }
+//     if (req.method === 'OPTIONS') {
+//       res.writeHead(204, headers);
+//       res.end();
+//       return;
+//     }
   
-    if (['GET', 'POST'].indexOf(req.method) > -1) {
-      res.writeHead(200, headers);
-      res.end('Hello World');
-      return;
-    }
+//     if (['GET', 'POST'].indexOf(req.method) > -1) {
+//       res.writeHead(200, headers);
+//       res.end('Hello World');
+//       return;
+//     }
   
-    res.writeHead(405, headers);
-    res.end(`${req.method} is not allowed for the request.`);
-  });
+//     res.writeHead(405, headers);
+//     res.end(`${req.method} is not allowed for the request.`);
+//   });
+var server = http.createServer(app)
 var io = require('socket.io')(server);
 app.use(express.json());
 app.use(authRouter);
@@ -81,7 +82,7 @@ const autoSaveData = async (data) => {
     document = await document.save();
 }
 
-server.on('request', app);
+// server.on('request', app);
 
 server.listen(PORT, "0.0.0.0", () => {
     console.log(`Listening to port: ${PORT}`);
