@@ -14,7 +14,7 @@ const app = express();
 
 const DB = process.env.DB_URL;
 
-var server = http.createServer((req, res, next) => {
+var server = http.createServer((req, res) => {
     const headers = {
       'Access-Control-Allow-Origin': '*', /* @dev First, read about security */
       'Access-Control-Allow-Methods': 'OPTIONS, GET, PUT, PATCH, POST, DELETE',
@@ -35,7 +35,7 @@ var server = http.createServer((req, res, next) => {
   
     // res.writeHead(405, headers);
     // res.end(`${req.method} is not allowed for the request.`);
-    next();
+    // next();
   });
 // var server = http.createServer(app)
 var io = require('socket.io')(server);
