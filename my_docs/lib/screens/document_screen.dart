@@ -224,7 +224,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                       child: quill.QuillEditor.basic(
                         configurations: quill.QuillEditorConfigurations(
                             controller: _quillController!,
-                            readOnly: false,
+                            // readOnly: false,
                             expands: false),
                       ),
                     ),
