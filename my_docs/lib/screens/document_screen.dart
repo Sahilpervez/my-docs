@@ -179,7 +179,7 @@ class _DocumentScreenState extends ConsumerState<DocumentScreen> {
                 onPressed: () {
                   Clipboard.setData(ClipboardData(
                           text:
-                              "http://localhost:3000/#/document/${widget.id}"))
+                              "https://main--my-docs-2612.netlify.app/#/document/${widget.id}"))
                       .then(
                     (value) => ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
